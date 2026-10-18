@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { NAV_LINKS } from "../data/navLinks";
-import { SITE } from "../data/site";
-import ContactInfo from "./ContactInfo";
-import Logo from "./Logo";
+import { NAV_LINKS } from "@/data/navLinks";
+import { SITE } from "@/data/site";
+import ContactInfo from "@/features/contact/ContactInfo";
+import Logo from "@/components/ui/Logo";
 
 export default function Footer() {
   return (

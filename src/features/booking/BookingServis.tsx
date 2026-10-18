@@ -1,8 +1,8 @@
 import { useEffect, useId, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { CheckCircle2 } from "lucide-react";
-import { SITE } from "../data/site";
-import { waLink } from "../utils/whatsapp";
-import WhatsAppIcon from "./WhatsAppIcon";
+import { SITE } from "@/data/site";
+import { waLink } from "@/utils/whatsapp";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
 
 /* ---------- Pengaturan slot ----------
    Samakan dengan jam buka di src/data/site.ts (Senin - Sabtu, 08:00 - 17:00). Slot per jam, terakhir 16:00. */

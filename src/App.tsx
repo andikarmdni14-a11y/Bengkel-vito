@@ -1,8 +1,8 @@
 import type { ComponentType, LazyExoticComponent } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import CartEffects from "./features/cart/CartEffects";
-import PublicLayout from "./layouts/PublicLayout";
+import CartEffects from "@/features/cart/CartEffects";
+import PublicLayout from "@/components/layout/PublicLayout";
 
 type PageComponent = ComponentType | LazyExoticComponent<ComponentType>;
 

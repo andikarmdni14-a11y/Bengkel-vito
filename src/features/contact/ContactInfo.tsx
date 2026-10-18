@@ -1,7 +1,7 @@
 import { Clock, MapPin, Phone } from "lucide-react";
-import { SITE } from "../data/site";
-import { formatPhone } from "../utils/format";
-import { waLink } from "../utils/whatsapp";
+import { SITE } from "@/data/site";
+import { formatPhone } from "@/utils/format";
+import { waLink } from "@/utils/whatsapp";
 
 export default function ContactInfo() {
   return (

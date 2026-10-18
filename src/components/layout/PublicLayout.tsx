@@ -1,10 +1,10 @@
 import { Suspense, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import CartDrawer from "../components/CartDrawer";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import { PageSkeleton } from "../components/Skeletons";
-import WhatsAppFloat from "../components/WhatsAppFloat";
+import CartDrawer from "@/features/cart/CartDrawer";
+import Footer from "./Footer";
+import Navbar from "./Navbar";
+import { PageSkeleton } from "@/components/ui/Skeletons";
+import WhatsAppFloat from "./WhatsAppFloat";
 
 /**
  * Pindah halaman: ke atas. Tautan dengan #hash (mis. /kontak#booking): gulir ke elemennya.

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import ErrorState from "../components/ErrorState";
-import ProductCard from "../components/ProductCard";
-import Reveal from "../components/Reveal";
-import SectionHead from "../components/SectionHead";
-import Seo from "../components/Seo";
-import { ProductCardSkeleton } from "../components/Skeletons";
+import ErrorState from "@/components/ui/ErrorState";
+import ProductCard from "@/features/catalog/ProductCard";
+import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
+import Seo from "@/components/ui/Seo";
+import { ProductCardSkeleton } from "@/components/ui/Skeletons";
 import { useProducts } from "../queries/products";
 
 const ALL = "Semua";

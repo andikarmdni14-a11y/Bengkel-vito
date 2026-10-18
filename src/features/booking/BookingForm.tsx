@@ -3,14 +3,14 @@ import { Controller, useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { CheckCircle2 } from "lucide-react";
-import { useCreateBooking } from "../queries/bookings";
-import { useServices } from "../queries/services";
-import { bookingSchema, type BookingFormValues } from "../schemas/booking";
-import { todayISO } from "../utils/date";
-import { getErrorMessage } from "../utils/errors";
-import { buildBookingMessage, waLink } from "../utils/whatsapp";
-import CustomSelect, { type SelectOption } from "./CustomSelect";
-import WhatsAppIcon from "./WhatsAppIcon";
+import { useCreateBooking } from "@/queries/bookings";
+import { useServices } from "@/queries/services";
+import { bookingSchema, type BookingFormValues } from "./schema";
+import { todayISO } from "@/utils/date";
+import { getErrorMessage } from "@/utils/errors";
+import { buildBookingMessage, waLink } from "@/utils/whatsapp";
+import CustomSelect, { type SelectOption } from "@/components/ui/CustomSelect";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
 
 const JAM = Array.from({ length: 10 }, (_, i) => `${String(8 + i).padStart(2, "0")}:00`);
 

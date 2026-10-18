@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { useInView } from "../hooks/useInView";
+import { useInView } from "@/hooks/useInView";
 
 export type RevealVariant = "up" | "left" | "right" | "scale" | "fade";
 

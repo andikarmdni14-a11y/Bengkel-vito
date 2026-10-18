@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { formatRupiah } from "../utils/format";
+import { formatRupiah } from "@/utils/format";
 
 /* ---------- DATA TARIF ----------
    PENTING: angka pada TARIF di bawah hanya CONTOH (dummy). Ganti dengan tarif asli bengkel.

@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { SITE } from "../data/site";
+import { SITE } from "@/data/site";
 
 interface SeoProps {
   title: string;

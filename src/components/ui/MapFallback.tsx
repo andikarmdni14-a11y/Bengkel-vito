@@ -1,4 +1,4 @@
-import { SITE } from "../data/site";
+import { SITE } from "@/data/site";
 import { MapPin } from "lucide-react";
 
 /** Tampilan peta ilustrasi saat SITE.mapEmbedUrl belum diisi. Hanya berisi info untuk pengunjung. */

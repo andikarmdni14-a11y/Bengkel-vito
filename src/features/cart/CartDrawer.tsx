@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import { selectTotalPrice, selectTotalQty, useCartStore } from "../features/cart/cartStore";
-import { formatRupiah } from "../utils/format";
-import { buildWhatsAppUrl } from "../utils/whatsapp";
-import Photo from "./Photo";
-import WhatsAppIcon from "./WhatsAppIcon";
+import { selectTotalPrice, selectTotalQty, useCartStore } from "./cartStore";
+import { formatRupiah } from "@/utils/format";
+import { buildWhatsAppUrl } from "@/utils/whatsapp";
+import Photo from "@/components/ui/Photo";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
 
 const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900";
 

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, ShoppingCart, X } from "lucide-react";
-import { selectTotalQty, useCartStore } from "../features/cart/cartStore";
-import { NAV_LINKS } from "../data/navLinks";
-import Logo from "./Logo";
+import { selectTotalQty, useCartStore } from "@/features/cart/cartStore";
+import { NAV_LINKS } from "@/data/navLinks";
+import Logo from "@/components/ui/Logo";
 import MobileMenu from "./MobileMenu";
 
 export default function Navbar() {

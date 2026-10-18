@@ -1,6 +1,6 @@
-import { SITE } from "../data/site";
-import { waLink } from "../utils/whatsapp";
-import WhatsAppIcon from "./WhatsAppIcon";
+import { SITE } from "@/data/site";
+import { waLink } from "@/utils/whatsapp";
+import WhatsAppIcon from "@/components/ui/WhatsAppIcon";
 
 /**
  * Tombol WhatsApp melayang (fixed, kanan bawah). Putih dengan aksen merah.

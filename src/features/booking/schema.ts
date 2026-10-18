@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { todayISO } from "../utils/date";
+import { todayISO } from "@/utils/date";
 
 const digitsOnly = (v: string) => v.replace(/\D/g, "");
 

@@ -1,10 +1,10 @@
 import { Navigation } from "lucide-react";
-import BookingForm from "../components/BookingForm";
-import ContactInfo from "../components/ContactInfo";
-import MapFallback from "../components/MapFallback";
-import Reveal from "../components/Reveal";
-import SectionHead from "../components/SectionHead";
-import Seo from "../components/Seo";
+import BookingForm from "@/features/booking/BookingForm";
+import ContactInfo from "@/features/contact/ContactInfo";
+import MapFallback from "@/components/ui/MapFallback";
+import Reveal from "@/components/ui/Reveal";
+import SectionHead from "@/components/ui/SectionHead";
+import Seo from "@/components/ui/Seo";
 import { SITE } from "../data/site";
 
 export default function Kontak() {

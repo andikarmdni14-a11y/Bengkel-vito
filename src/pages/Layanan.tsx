@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import ErrorState from "../components/ErrorState";
-import SectionHead from "../components/SectionHead";
-import Reveal from "../components/Reveal";
-import Seo from "../components/Seo";
-import ServiceCard from "../components/ServiceCard";
-import { ServiceCardSkeleton } from "../components/Skeletons";
+import ErrorState from "@/components/ui/ErrorState";
+import SectionHead from "@/components/ui/SectionHead";
+import Reveal from "@/components/ui/Reveal";
+import Seo from "@/components/ui/Seo";
+import ServiceCard from "@/features/services/ServiceCard";
+import { ServiceCardSkeleton } from "@/components/ui/Skeletons";
 import { useServices } from "../queries/services";
 import { stagger } from "../utils/motion";
 

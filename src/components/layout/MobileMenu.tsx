@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { NAV_LINKS } from "../data/navLinks";
+import { NAV_LINKS } from "@/data/navLinks";
 
 interface MobileMenuProps {
   open: boolean;

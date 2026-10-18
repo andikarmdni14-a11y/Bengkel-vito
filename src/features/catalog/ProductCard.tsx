@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Check, ShoppingBag } from "lucide-react";
-import { selectQtyOf, useCartStore } from "../features/cart/cartStore";
-import type { Product } from "../types";
-import { formatRupiah } from "../utils/format";
-import Photo from "./Photo";
+import { selectQtyOf, useCartStore } from "@/features/cart/cartStore";
+import type { Product } from "@/types";
+import { formatRupiah } from "@/utils/format";
+import Photo from "@/components/ui/Photo";
 
 /**
  * Kartu produk gaya Scandinavian: satu permukaan off-white (#F5F5F5) tanpa border dan tanpa shadow.
