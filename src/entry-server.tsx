@@ -1,8 +1,10 @@
+import { QueryClientProvider } from "@tanstack/react-query";
 import { renderToString } from "react-dom/server";
 import { HelmetProvider, type HelmetServerState } from "react-helmet-async";
 import { StaticRouter } from "react-router-dom/server";
 import App from "./App";
 import { CartProvider } from "./context/CartContext";
+import { createQueryClient } from "./lib/queryClient";
 
 export interface RenderResult {
   /** Markup untuk dimasukkan ke dalam <div id="root">. */
@@ -19,14 +21,19 @@ export interface RenderResult {
  */
 export function render(url: string): RenderResult {
   const helmetContext: { helmet?: HelmetServerState } = {};
+  // QueryClient BARU per render: cache tidak boleh dipakai bersama antar route. renderToString tidak menjalankan
+  // efek, jadi tidak ada fetch; query berstatus "pending" sehingga markup = skeleton, sama dengan render awal klien.
+  const queryClient = createQueryClient();
 
   const html = renderToString(
     <HelmetProvider context={helmetContext}>
-      <StaticRouter location={url}>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </StaticRouter>
+      <QueryClientProvider client={queryClient}>
+        <StaticRouter location={url}>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </StaticRouter>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 

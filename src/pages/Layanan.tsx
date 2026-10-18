@@ -5,7 +5,7 @@ import Reveal from "../components/Reveal";
 import Seo from "../components/Seo";
 import ServiceCard from "../components/ServiceCard";
 import { ServiceCardSkeleton } from "../components/Skeletons";
-import { useServices } from "../hooks/useServices";
+import { useServices } from "../queries/services";
 import { stagger } from "../utils/motion";
 
 export default function Layanan() {

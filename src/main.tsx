@@ -1,22 +1,39 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import ReactDOM from "react-dom/client";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { CartProvider } from "./context/CartContext";
+import { createQueryClient } from "./lib/queryClient";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Elemen #root tidak ditemukan di index.html");
 
+// Satu QueryClient untuk seluruh sesi browser (di server dibuat per render, lihat entry-server.tsx).
+const queryClient = createQueryClient();
+
+// Devtools hanya di mode dev dan dimuat lazy: tidak masuk bundel produksi, dan tidak ikut markup hydration.
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() => import("@tanstack/react-query-devtools").then((m) => ({ default: m.ReactQueryDevtools })))
+  : null;
+
 const app = (
   <React.StrictMode>
     <HelmetProvider>
-      <BrowserRouter>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </BrowserRouter>
+        {ReactQueryDevtools && (
+          <Suspense fallback={null}>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+        )}
+      </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>
 );

@@ -6,7 +6,7 @@ import Reveal from "../components/Reveal";
 import SectionHead from "../components/SectionHead";
 import Seo from "../components/Seo";
 import { ProductCardSkeleton } from "../components/Skeletons";
-import { useProducts } from "../hooks/useProducts";
+import { useProducts } from "../queries/products";
 
 const ALL = "Semua";
 

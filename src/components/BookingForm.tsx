@@ -3,8 +3,8 @@ import { Controller, useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { CheckCircle2 } from "lucide-react";
-import { useServices } from "../hooks/useServices";
-import { createBooking } from "../lib/api";
+import { useCreateBooking } from "../queries/bookings";
+import { useServices } from "../queries/services";
 import { bookingSchema, type BookingFormValues } from "../schemas/booking";
 import { todayISO } from "../utils/date";
 import { getErrorMessage } from "../utils/errors";
@@ -68,6 +68,7 @@ const DEFAULT_VALUES: BookingFormValues = {
 
 export default function BookingForm() {
   const { services, loading: servicesLoading, error: servicesError, refetch: refetchServices } = useServices();
+  const { mutateAsync: submitBooking } = useCreateBooking();
   const [waUrl, setWaUrl] = useState<string | null>(null);
 
   const {
@@ -100,7 +101,7 @@ export default function BookingForm() {
 
   const onSubmit = async (values: BookingFormValues) => {
     try {
-      await createBooking(values);
+      await submitBooking(values);
     } catch (err) {
       toast.error(getErrorMessage(err, "Gagal mengirim booking. Silakan coba lagi."));
       return;

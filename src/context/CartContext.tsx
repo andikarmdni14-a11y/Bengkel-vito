@@ -9,9 +9,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { loadFresh } from "../hooks/useAsyncResource";
-import { fetchProducts } from "../lib/api";
+import { productsQueryOptions } from "../queries/products";
 import type { CartableProduct, CartItem } from "../types";
 import { cartReducer } from "./cartReducer";
 
@@ -62,6 +62,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, dispatch] = useReducer(cartReducer, []);
   const [restored, setRestored] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     dispatch({ type: "LOAD", items: loadCart() });
@@ -87,7 +88,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isOpen || itemsRef.current.length === 0) return;
     let active = true;
-    loadFresh("products", fetchProducts)
+    // fetchQuery memakai cache bila masih segar (staleTime 60 dtk), jadi hemat request.
+    queryClient
+      .fetchQuery(productsQueryOptions)
       .then((products) => {
         if (!active) return;
         const removed = itemsRef.current.filter((i) => !products.some((p) => p.id === i.id)).length;
@@ -103,7 +106,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [isOpen]);
+  }, [isOpen, queryClient]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);

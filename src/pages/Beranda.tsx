@@ -10,7 +10,7 @@ import Seo from "../components/Seo";
 import ServiceCard from "../components/ServiceCard";
 import { ServiceCardSkeleton } from "../components/Skeletons";
 import { SITE } from "../data/site";
-import { useServices } from "../hooks/useServices";
+import { useServices } from "../queries/services";
 import { stagger } from "../utils/motion";
 
 export default function Beranda() {
