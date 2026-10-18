@@ -5,6 +5,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { createQueryClient } from "./lib/queryClient";
+import { lazyPages, preloadRoute } from "./pages/lazy";
+import { normalizePath } from "./utils/path";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
@@ -23,7 +25,7 @@ const app = (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <App />
+          <App pages={lazyPages} />
         </BrowserRouter>
         {ReactQueryDevtools && (
           <Suspense fallback={null}>
@@ -39,11 +41,16 @@ const app = (
 // data-prerender-path berisi alamat yang dirender. Hydrate HANYA bila markup itu memang untuk URL
 // yang sedang dibuka. Selain itu (mis. alamat tak dikenal yang dilayani index.html oleh fallback SPA)
 // render dari nol supaya tidak terjadi hydration mismatch.
-const normalize = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path);
 const prerenderedPath = rootElement.dataset.prerenderPath;
 
-if (rootElement.hasChildNodes() && prerenderedPath === normalize(window.location.pathname)) {
-  ReactDOM.hydrateRoot(rootElement, app);
+if (rootElement.hasChildNodes() && prerenderedPath === normalizePath(window.location.pathname)) {
+  // Halaman ini lazy: unduh dulu chunk-nya, BARU hydrate. Tanpa ini, React mendapati komponen yang belum
+  // dimuat di tengah hydration dan harus menundanya. Bila unduhan gagal, tetap hydrate (lazy akan mencoba lagi).
+  preloadRoute(window.location.pathname)
+    .catch(() => undefined)
+    .finally(() => {
+      ReactDOM.hydrateRoot(rootElement, app);
+    });
 } else {
   ReactDOM.createRoot(rootElement).render(app);
 }

@@ -36,3 +36,24 @@ export function ServiceCardSkeleton() {
     </div>
   );
 }
+
+/**
+ * Fallback <Suspense> saat chunk halaman diunduh. min-h menahan tinggi area konten agar Footer tidak
+ * melompat naik-turun (layout shift) selama perpindahan halaman.
+ */
+export function PageSkeleton() {
+  return (
+    <div role="status" aria-busy="true" className="mx-auto min-h-[60dvh] max-w-6xl px-5 py-12 sm:px-8 md:py-16">
+      <span className="sr-only">Memuat halaman...</span>
+      <div aria-hidden="true">
+        <div className={`h-9 w-2/3 max-w-md rounded bg-slate-200 ${pulse}`} />
+        <div className={`mt-4 h-4 w-full max-w-xl rounded bg-slate-100 ${pulse}`} />
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <ServiceCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

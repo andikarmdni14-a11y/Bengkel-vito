@@ -4,6 +4,7 @@ import { HelmetProvider, type HelmetServerState } from "react-helmet-async";
 import { StaticRouter } from "react-router-dom/server";
 import App from "./App";
 import { createQueryClient } from "./lib/queryClient";
+import { eagerPages } from "./pages/eager";
 
 export interface RenderResult {
   /** Markup untuk dimasukkan ke dalam <div id="root">. */
@@ -28,7 +29,7 @@ export function render(url: string): RenderResult {
     <HelmetProvider context={helmetContext}>
       <QueryClientProvider client={queryClient}>
         <StaticRouter location={url}>
-          <App />
+          <App pages={eagerPages} />
         </StaticRouter>
       </QueryClientProvider>
     </HelmetProvider>
