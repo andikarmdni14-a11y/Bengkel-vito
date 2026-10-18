@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Check, ShoppingBag } from "lucide-react";
-import { useCart } from "../context/CartContext";
+import { selectQtyOf, useCartStore } from "../features/cart/cartStore";
 import type { Product } from "../types";
 import { formatRupiah } from "../utils/format";
 import Photo from "./Photo";
@@ -16,10 +16,12 @@ import Photo from "./Photo";
  * Menambah produk langsung membuka panel keranjang (CartDrawer) dari kanan.
  */
 export default function ProductCard({ product }: { product: Product }) {
-  const { items, addItem, openCart } = useCart();
+  // Hanya kartu yang jumlahnya berubah yang render ulang (dulu: semua kartu tiap isi keranjang berubah).
+  const inCart = useCartStore(selectQtyOf(product.id));
+  const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
   const [added, setAdded] = useState(false);
 
-  const inCart = items.find((i) => i.id === product.id)?.qty ?? 0;
   const soldOut = product.stock === 0;
   const maxed = !soldOut && inCart >= product.stock;
   const lowStock = product.stock > 0 && product.stock <= 5;

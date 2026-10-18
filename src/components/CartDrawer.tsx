@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useCart } from "../context/CartContext";
+import { useShallow } from "zustand/react/shallow";
+import { selectTotalPrice, selectTotalQty, useCartStore } from "../features/cart/cartStore";
 import { formatRupiah } from "../utils/format";
 import { buildWhatsAppUrl } from "../utils/whatsapp";
 import Photo from "./Photo";
@@ -14,7 +15,14 @@ const FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:outli
  * Di HP, panel menyisakan strip overlay di kiri; ketuk strip itu untuk menutup.
  */
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, setQty, removeItem, clearCart, totalQty, totalPrice } = useCart();
+  const items = useCartStore((s) => s.items);
+  const isOpen = useCartStore((s) => s.isOpen);
+  const totalQty = useCartStore(selectTotalQty);
+  const totalPrice = useCartStore(selectTotalPrice);
+  // Aksi bersifat stabil; useShallow membuat objek hasil selector tidak dianggap "baru" tiap render.
+  const { closeCart, setQty, removeItem, clearCart } = useCartStore(
+    useShallow((s) => ({ closeCart: s.closeCart, setQty: s.setQty, removeItem: s.removeItem, clearCart: s.clearCart }))
+  );
   const panelRef = useRef<HTMLElement>(null);
 
   useEffect(() => {

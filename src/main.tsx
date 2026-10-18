@@ -4,7 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import { CartProvider } from "./context/CartContext";
 import { createQueryClient } from "./lib/queryClient";
 import "./index.css";
 
@@ -24,9 +23,7 @@ const app = (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <CartProvider>
-            <App />
-          </CartProvider>
+          <App />
         </BrowserRouter>
         {ReactQueryDevtools && (
           <Suspense fallback={null}>

@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import CartEffects from "./features/cart/CartEffects";
 import PublicLayout from "./layouts/PublicLayout";
 import Beranda from "./pages/Beranda";
 import Katalog from "./pages/Katalog";
@@ -12,6 +13,7 @@ export default function App() {
     <>
       {/* Umpan balik visual (sukses / gagal / keranjang) menggantikan alert() bawaan browser */}
       <Toaster position="top-center" toastOptions={{ duration: 3500, style: { fontSize: "14px" } }} />
+      <CartEffects />
       <Routes>
         <Route element={<PublicLayout />}>
           <Route index element={<Beranda />} />

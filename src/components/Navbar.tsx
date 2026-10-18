@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, ShoppingCart, X } from "lucide-react";
-import { useCart } from "../context/CartContext";
+import { selectTotalQty, useCartStore } from "../features/cart/cartStore";
 import { NAV_LINKS } from "../data/navLinks";
 import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { totalQty, openCart } = useCart();
+  // Selector: Navbar hanya render ulang saat JUMLAH barang berubah (bukan saat drawer dibuka/ditutup).
+  const totalQty = useCartStore(selectTotalQty);
+  const openCart = useCartStore((s) => s.openCart);
   const { pathname } = useLocation();
 
   // Tutup menu mobile setiap kali halaman berpindah (termasuk tombol Back)

@@ -1,4 +1,4 @@
-import type { CartAction, CartItem } from "../types";
+import type { CartAction, CartItem } from "@/types";
 
 /** Reducer murni keranjang (tanpa React) supaya mudah dites. */
 export function cartReducer(items: CartItem[], action: CartAction): CartItem[] {
@@ -60,7 +60,7 @@ export function cartReducer(items: CartItem[], action: CartAction): CartItem[] {
       return changed ? next : items; // referensi sama bila tidak ada perubahan -> tanpa render ulang
     }
     case "LOAD":
-      // Isi awal dari localStorage, dipanggil sekali setelah mount (lihat CartProvider).
+      // Isi awal dari localStorage, dipanggil sekali setelah mount (lihat useCartPersistence).
       return action.items;
     case "REMOVE":
       return items.filter((i) => i.id !== action.id);

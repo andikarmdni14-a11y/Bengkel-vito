@@ -3,7 +3,6 @@ import { renderToString } from "react-dom/server";
 import { HelmetProvider, type HelmetServerState } from "react-helmet-async";
 import { StaticRouter } from "react-router-dom/server";
 import App from "./App";
-import { CartProvider } from "./context/CartContext";
 import { createQueryClient } from "./lib/queryClient";
 
 export interface RenderResult {
@@ -29,9 +28,7 @@ export function render(url: string): RenderResult {
     <HelmetProvider context={helmetContext}>
       <QueryClientProvider client={queryClient}>
         <StaticRouter location={url}>
-          <CartProvider>
-            <App />
-          </CartProvider>
+          <App />
         </StaticRouter>
       </QueryClientProvider>
     </HelmetProvider>
