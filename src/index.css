@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/* ---------- Animasi saat scroll (komponen <Reveal>) ----------
+   Sengaja di luar @layer agar tidak ikut terbuang oleh Tailwind (nama kelas dirangkai dinamis di TSX). */
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal[data-reveal="up"] {
+  transform: translate3d(0, 28px, 0);
+}
+.reveal[data-reveal="left"] {
+  transform: translate3d(-36px, 0, 0);
+}
+.reveal[data-reveal="right"] {
+  transform: translate3d(36px, 0, 0);
+}
+.reveal[data-reveal="scale"] {
+  transform: scale(0.94);
+}
+/* data-reveal="fade": hanya opacity */
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  will-change: auto; /* lepas lapisan GPU & stacking context setelah selesai (dropdown/hover di dalamnya aman) */
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
