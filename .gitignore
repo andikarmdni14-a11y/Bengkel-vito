@@ -4,3 +4,6 @@ dist
 .env
 .env.local
 dist-ssr
+playwright-report
+test-results
+coverage
