@@ -16,6 +16,18 @@ interface PhotoProps {
   fit?: "cover" | "contain";
   /** Placeholder tanpa warna latar, agar menyatu dengan permukaan di belakangnya (mis. kartu produk). */
   bare?: boolean;
+  /** Dimensi intrinsik gambar (px). Membantu browser menyisihkan ruang sebelum gambar terunduh (mengurangi layout shift). */
+  width?: number;
+  height?: number;
+  /** Versi beresolusi berbeda dari gambar yang sama, mis. "/a-400.webp 400w, /a-800.webp 800w". */
+  srcSet?: string;
+  /** Lebar tampil gambar per breakpoint; dipakai bersama srcSet, mis. "(min-width: 1024px) 25vw, 50vw". */
+  sizes?: string;
+  /**
+   * Format modern dengan fallback otomatis: dirender sebagai <picture>. Urutkan dari format terbaik, mis.
+   * [{ type: "image/avif", srcSet: "/a.avif" }, { type: "image/webp", srcSet: "/a.webp" }]. `src` menjadi fallback <img>.
+   */
+  sources?: ReadonlyArray<{ type: string; srcSet: string; sizes?: string }>;
 }
 
 // Nama kelas ditulis utuh (bukan dirangkai) agar terdeteksi Tailwind.
@@ -35,8 +47,16 @@ export default function Photo({
   priority = false,
   fit = "cover",
   bare = false,
+  width,
+  height,
+  srcSet,
+  sizes,
+  sources,
 }: PhotoProps) {
-  const [failed, setFailed] = useState(false);
+  // Simpan URL yang GAGAL (bukan boolean): bila `src` berganti (mis. data produk diperbarui), gambar baru
+  // dicoba lagi. Dengan boolean, satu kegagalan membuat placeholder "menempel" selamanya.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const failed = failedSrc !== null && failedSrc === src;
 
   if (!src || failed || isDummyImage(src)) {
     return (
@@ -53,14 +73,30 @@ export default function Photo({
     );
   }
 
-  return (
+  const img = (
     <img
       src={src}
+      srcSet={srcSet}
+      sizes={sizes}
+      width={width}
+      height={height}
       alt={alt}
       loading={priority ? "eager" : "lazy"}
       decoding="async"
-      onError={() => setFailed(true)}
+      onError={() => setFailedSrc(src)}
       className={`h-full w-full ${FIT[fit]} ${className}`}
     />
+  );
+
+  if (!sources || sources.length === 0) return img;
+
+  // <picture>: browser memilih <source> pertama yang formatnya didukung; <img> di dalamnya = fallback + pemicu onError.
+  return (
+    <picture className="contents">
+      {sources.map((source) => (
+        <source key={source.type} type={source.type} srcSet={source.srcSet} sizes={source.sizes ?? sizes} />
+      ))}
+      {img}
+    </picture>
   );
 }
