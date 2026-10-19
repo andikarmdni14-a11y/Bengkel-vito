@@ -10,7 +10,7 @@ Pelanggan melihat katalog (harga & stok dari database), mengisi keranjang lalu c
 
 ## Cara menjalankan
 
-Pastikan Node.js 18 atau lebih baru sudah terpasang.
+Pastikan Node.js 20 atau lebih baru sudah terpasang.
 
 ### 1. Siapkan Supabase
 

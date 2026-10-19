@@ -2,7 +2,7 @@ import { Writable } from "node:stream";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderToPipeableStream } from "react-dom/server";
 import { HelmetProvider, type HelmetServerState } from "react-helmet-async";
-import { StaticRouter } from "react-router-dom/server";
+import { StaticRouter } from "react-router-dom";
 import App from "./App";
 import { createQueryClient } from "./lib/queryClient";
 
@@ -71,6 +71,9 @@ export function render(url: string): Promise<RenderResult> {
 
     sink.on("finish", () => {
       clearTimeout(timer);
+      // Hapus cache + timer GC (gcTime 5 menit) milik QueryClient ini. Tanpa ini proses Node prerender baru
+      // berhenti ~5 menit setelah semua route selesai, karena timer tersebut menahan event loop.
+      queryClient.clear();
       if (failure !== undefined) {
         reject(failure instanceof Error ? failure : new Error(String(failure)));
         return;
