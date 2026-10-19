@@ -1,15 +1,12 @@
 import { create } from "zustand";
-import type { CartAction, CartableProduct, CartItem } from "@/types";
-import { cartReducer } from "./cartReducer";
+import type { CartableProduct, CartItem } from "@/types";
 
 /**
- * Store keranjang (Zustand). Logika perubahan item tetap di `cartReducer` (murni, sudah dites) supaya
- * migrasi dari Context tidak mengubah perilaku; store hanya menjadi "rumah" state + aksi.
+ * Store keranjang (Zustand), satu-satunya tempat logika keranjang.
  *
  * Kenapa lebih sedikit render ulang dibanding Context:
- * - Komponen memilih potongan state lewat selector (mis. `selectTotalQty`), dan hanya render ulang bila
- *   HASIL selector berubah. Dengan Context, setiap komponen pemakai `useCart()` render ulang pada tiap
- *   perubahan apa pun (buka/tutup drawer, ubah qty satu item, dst.).
+ * - Komponen memilih potongan state lewat selector (mis. `selectTotalQty`) dan hanya render ulang bila
+ *   HASIL selector berubah.
  * - Aksi (addItem, ...) berupa referensi stabil, tidak perlu useCallback.
  */
 export interface CartState {
@@ -17,38 +14,89 @@ export interface CartState {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
+  /** Produk stok habis diabaikan; qty dibatasi stok. Produk yang sudah ada: qty dijumlahkan dan data produk disegarkan. */
   addItem: (product: CartableProduct, qty?: number) => void;
-  /** qty 0 TIDAK menghapus item (ditandai "Stok habis"); hapus lewat removeItem. */
+  /** qty dibatasi 0..stok. qty 0 TIDAK menghapus item (ditandai "Stok habis"); hapus lewat removeItem. */
   setQty: (id: string, qty: number) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
-  /** Samakan harga/stok/nama/foto dengan katalog terbaru; barang yang sudah tidak ada dikeluarkan. */
-  syncProducts: (products: CartableProduct[]) => void;
+  /**
+   * Samakan harga/stok/nama/foto dengan katalog terbaru; qty dibatasi stok terbaru; barang yang sudah tidak ada
+   * di katalog dikeluarkan. Mengembalikan jumlah barang yang dikeluarkan (untuk pemberitahuan di UI).
+   * Tanpa perubahan, `items` tidak diganti sehingga tidak ada render ulang.
+   */
+  syncProducts: (products: CartableProduct[]) => number;
   /** Isi awal dari localStorage (lihat useCartPersistence). */
   hydrate: (items: CartItem[]) => void;
 }
 
-export const useCartStore = create<CartState>()((set) => {
-  // Jalankan reducer; bila hasilnya referensi yang sama (tidak ada perubahan), jangan notifikasi subscriber.
-  const apply = (action: CartAction) =>
-    set((state) => {
-      const items = cartReducer(state.items, action);
-      return items === state.items ? state : { items };
-    });
+export const useCartStore = create<CartState>()((set, get) => ({
+  items: [],
+  isOpen: false,
 
-  return {
-    items: [],
-    isOpen: false,
-    openCart: () => set({ isOpen: true }),
-    closeCart: () => set({ isOpen: false }),
-    addItem: (product, qty = 1) => apply({ type: "ADD", product, qty }),
-    setQty: (id, qty) => apply({ type: "SET_QTY", id, qty }),
-    removeItem: (id) => apply({ type: "REMOVE", id }),
-    clearCart: () => apply({ type: "CLEAR" }),
-    syncProducts: (products) => apply({ type: "SYNC", products }),
-    hydrate: (items) => apply({ type: "LOAD", items }),
-  };
-});
+  openCart: () => set({ isOpen: true }),
+  closeCart: () => set({ isOpen: false }),
+
+  addItem: (product, qty = 1) => {
+    if (product.stock <= 0) return;
+    const { id, name, price, stock, image_url } = product;
+    const items = get().items;
+
+    if (!items.some((i) => i.id === id)) {
+      set({ items: [...items, { id, name, price, stock, image_url, qty: Math.min(qty, stock) }] });
+      return;
+    }
+    // Data produk dinamis: segarkan harga/stok item lama dengan data terbaru saat ditambah lagi.
+    set({
+      items: items.map((i) =>
+        i.id === id ? { ...i, name, price, stock, image_url, qty: Math.min(i.qty + qty, stock) } : i
+      ),
+    });
+  },
+
+  setQty: (id, qty) =>
+    set((state) => ({
+      items: state.items.map((i) => (i.id === id ? { ...i, qty: Math.max(0, Math.min(qty, i.stock)) } : i)),
+    })),
+
+  removeItem: (id) => set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+
+  clearCart: () => set({ items: [] }),
+
+  syncProducts: (products) => {
+    const byId = new Map(products.map((p) => [p.id, p]));
+    const next: CartItem[] = [];
+    let changed = false;
+    let removed = 0;
+
+    for (const item of get().items) {
+      const p = byId.get(item.id);
+      if (!p) {
+        changed = true;
+        removed += 1;
+        continue;
+      }
+      const qty = Math.min(item.qty, p.stock);
+      if (
+        qty !== item.qty ||
+        p.price !== item.price ||
+        p.stock !== item.stock ||
+        p.name !== item.name ||
+        p.image_url !== item.image_url
+      ) {
+        changed = true;
+        next.push({ id: item.id, name: p.name, price: p.price, stock: p.stock, image_url: p.image_url, qty });
+      } else {
+        next.push(item);
+      }
+    }
+
+    if (changed) set({ items: next });
+    return removed;
+  },
+
+  hydrate: (items) => set({ items }),
+}));
 
 /* ---------- Selector turunan ----------
  * Hasilnya bilangan (primitif): komponen hanya render ulang bila angkanya berubah. JANGAN membuat selector yang

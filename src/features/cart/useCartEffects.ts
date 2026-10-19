@@ -38,9 +38,7 @@ export function useCartPriceSync(): void {
       .fetchQuery(productsQueryOptions)
       .then((products) => {
         if (!active) return;
-        const { items, syncProducts } = useCartStore.getState(); // isi keranjang TERBARU, bukan saat efek dipasang
-        const removed = items.filter((i) => !products.some((p) => p.id === i.id)).length;
-        syncProducts(products);
+        const removed = useCartStore.getState().syncProducts(products); // memakai isi keranjang TERBARU
         if (removed > 0) {
           toast(`${removed} barang sudah tidak tersedia dan dikeluarkan dari keranjang`, { id: "cart-sync" });
         }

@@ -63,14 +63,6 @@ export interface CartItem extends CartableProduct {
   qty: number;
 }
 
-export type CartAction =
-  | { type: "ADD"; product: CartableProduct; qty: number }
-  | { type: "SET_QTY"; id: string; qty: number }
-  | { type: "REMOVE"; id: string }
-  | { type: "SYNC"; products: CartableProduct[] }
-  | { type: "LOAD"; items: CartItem[] }
-  | { type: "CLEAR" };
-
 /* ---------- Konfigurasi situs ---------- */
 
 export interface NavLinkItem {

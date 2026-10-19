@@ -99,7 +99,7 @@ src/
 │   ├── ui/                      # komponen presentasi reusable tanpa logika bisnis: Photo, Skeletons, Seo, CustomSelect, ...
 │   └── layout/                  # PublicLayout, Navbar, MobileMenu, Footer, WhatsAppFloat
 ├── features/                    # komponen + logika per fitur
-│   ├── cart/                    # cartStore (Zustand), cartReducer, cartStorage, useCartEffects, CartDrawer
+│   ├── cart/                    # cartStore (Zustand, satu-satunya logika keranjang), cartStorage, useCartEffects, CartDrawer
 │   ├── catalog/                 # ProductCard
 │   ├── services/                # ServiceCard, serviceIcons
 │   ├── booking/                 # BookingForm, BookingServis, KalkulatorBiaya, schema (zod)

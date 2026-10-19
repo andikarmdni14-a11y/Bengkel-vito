@@ -54,9 +54,9 @@ Revert satu fase: `git revert <hash>`. Fase 5 hanya memindahkan file, jadi aman 
 Keranjang = satu slice kecil, dua pemakai lintas-halaman (Navbar, drawer), tanpa middleware kompleks. RTK menambah boilerplate
 tanpa manfaat di skala ini. Bila nanti ada banyak slice yang saling bergantung, antarmuka selector yang sama memudahkan pindah.
 
-- `cartReducer.ts` **dipertahankan apa adanya** (murni, kini dites 14 kasus); store hanya membungkusnya. Perilaku tidak berubah:
-  qty 0 tidak menghapus item, SYNC mengeluarkan barang hilang, format localStorage `fitomotor:cart:v2` sama
-  (keranjang pengunjung lama tetap terbaca).
+- Semua logika keranjang ada di satu file, `cartStore.ts` (reducer terpisah sudah dihapus; 14 kasus ujinya dipindah ke
+  `cartStore.test.ts`). Perilaku tidak berubah: qty 0 tidak menghapus item, `syncProducts` mengeluarkan barang hilang dan
+  mengembalikan jumlahnya, format localStorage `fitomotor:cart:v2` sama (keranjang pengunjung lama tetap terbaca).
 - Re-render berkurang: `Navbar` hanya render ulang saat **jumlah** berubah; `ProductCard` hanya saat qty **produknya sendiri** berubah.
 - Store selalu mulai kosong dan diisi dari localStorage setelah mount (aturan hydration prerender tetap terjaga).
 - Aturan Zustand v5: selector tidak boleh mengembalikan objek/array baru tiap panggilan; pakai `useShallow` (contoh di `CartDrawer`).

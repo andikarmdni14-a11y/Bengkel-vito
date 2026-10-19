@@ -10,93 +10,139 @@ const product = (over: Partial<CartableProduct> = {}): CartableProduct => ({
   image_url: null,
   ...over,
 });
+const store = () => useCartStore.getState();
+const ids = () => store().items.map((i) => i.id);
 
 beforeEach(() => {
   // Store adalah singleton modul: kembalikan ke state awal antar tes (true = ganti, bukan gabung).
   useCartStore.setState(useCartStore.getInitialState(), true);
 });
 
-describe("useCartStore", () => {
+describe("state awal & drawer", () => {
   it("mulai kosong dan tertutup (sama dengan HTML hasil prerender)", () => {
-    const { items, isOpen } = useCartStore.getState();
-    expect(items).toEqual([]);
-    expect(isOpen).toBe(false);
-  });
-
-  it("addItem menambah produk, qty bawaan 1", () => {
-    useCartStore.getState().addItem(product());
-    expect(useCartStore.getState().items).toEqual([{ ...product(), qty: 1 }]);
-  });
-
-  it("addItem produk yang sama menambah qty, dibatasi stok", () => {
-    const { addItem } = useCartStore.getState();
-    addItem(product({ stock: 2 }));
-    addItem(product({ stock: 2 }), 5);
-    expect(useCartStore.getState().items[0]?.qty).toBe(2);
-  });
-
-  it("setQty 0 mempertahankan item; removeItem menghapusnya; clearCart mengosongkan", () => {
-    const s = useCartStore.getState();
-    s.addItem(product({ id: "a" }));
-    s.addItem(product({ id: "b" }));
-    s.setQty("a", 0);
-    expect(useCartStore.getState().items.map((i) => [i.id, i.qty])).toEqual([
-      ["a", 0],
-      ["b", 1],
-    ]);
-    s.removeItem("a");
-    expect(useCartStore.getState().items.map((i) => i.id)).toEqual(["b"]);
-    s.clearCart();
-    expect(useCartStore.getState().items).toEqual([]);
+    expect(store().items).toEqual([]);
+    expect(store().isOpen).toBe(false);
   });
 
   it("openCart / closeCart mengubah isOpen tanpa menyentuh items", () => {
-    useCartStore.getState().addItem(product());
-    const before = useCartStore.getState().items;
-    useCartStore.getState().openCart();
-    expect(useCartStore.getState().isOpen).toBe(true);
-    useCartStore.getState().closeCart();
-    expect(useCartStore.getState().isOpen).toBe(false);
-    expect(useCartStore.getState().items).toBe(before);
+    store().addItem(product());
+    const before = store().items;
+    store().openCart();
+    expect(store().isOpen).toBe(true);
+    store().closeCart();
+    expect(store().isOpen).toBe(false);
+    expect(store().items).toBe(before);
+  });
+});
+
+describe("addItem", () => {
+  it("menambah produk baru, qty bawaan 1", () => {
+    store().addItem(product());
+    expect(store().items).toEqual([{ ...product(), qty: 1 }]);
   });
 
-  it("hydrate mengisi keranjang dari data tersimpan", () => {
-    useCartStore.getState().hydrate([{ ...product(), qty: 3 }]);
-    expect(useCartStore.getState().items[0]?.qty).toBe(3);
+  it("memakai qty yang diminta, dibatasi stok", () => {
+    store().addItem(product({ stock: 2 }), 5);
+    expect(store().items[0]?.qty).toBe(2);
   });
 
-  it("syncProducts tanpa perubahan TIDAK mengganti referensi items (subscriber tidak dinotifikasi)", () => {
-    useCartStore.getState().addItem(product());
+  it("mengabaikan produk stok habis (tidak ada perubahan, subscriber tidak dinotifikasi)", () => {
     let notified = 0;
-    const unsubscribe = useCartStore.subscribe(() => {
-      notified += 1;
-    });
-    useCartStore.getState().syncProducts([product()]);
-    unsubscribe();
+    const off = useCartStore.subscribe(() => void (notified += 1));
+    store().addItem(product({ stock: 0 }));
+    off();
+    expect(store().items).toEqual([]);
     expect(notified).toBe(0);
   });
 
-  it("syncProducts mengeluarkan barang yang sudah tidak ada dan memperbarui harga", () => {
-    const s = useCartStore.getState();
-    s.addItem(product({ id: "a" }));
-    s.addItem(product({ id: "b" }));
-    s.syncProducts([product({ id: "b", price: 99000 })]);
-    expect(useCartStore.getState().items).toEqual([{ ...product({ id: "b", price: 99000 }), qty: 1 }]);
+  it("produk yang sama: qty dijumlahkan, dibatasi stok terbaru", () => {
+    store().addItem(product({ stock: 5 }), 4);
+    store().addItem(product({ stock: 5 }), 3);
+    expect(store().items).toHaveLength(1);
+    expect(store().items[0]?.qty).toBe(5);
+  });
+
+  it("produk yang sama: harga/stok/nama disegarkan dengan data terbaru", () => {
+    store().addItem(product({ price: 70000, stock: 3 }));
+    store().addItem(product({ price: 80000, stock: 9, name: "Oli Mesin 1L" }));
+    expect(store().items[0]).toEqual({ ...product({ price: 80000, stock: 9, name: "Oli Mesin 1L" }), qty: 2 });
+  });
+});
+
+describe("setQty / removeItem / clearCart / hydrate", () => {
+  it("setQty mengubah qty dan membatasinya antara 0 dan stok", () => {
+    store().addItem(product({ stock: 3 }));
+    store().setQty("p1", 2);
+    expect(store().items[0]?.qty).toBe(2);
+    store().setQty("p1", 99);
+    expect(store().items[0]?.qty).toBe(3);
+    store().setQty("p1", -5);
+    expect(store().items[0]?.qty).toBe(0);
+  });
+
+  it("setQty 0 TIDAK menghapus item (ditandai Stok habis di UI)", () => {
+    store().addItem(product({ id: "a" }));
+    store().addItem(product({ id: "b" }));
+    store().setQty("a", 0);
+    expect(store().items.map((i) => [i.id, i.qty])).toEqual([
+      ["a", 0],
+      ["b", 1],
+    ]);
+  });
+
+  it("removeItem menghapus satu item; clearCart mengosongkan", () => {
+    store().addItem(product({ id: "a" }));
+    store().addItem(product({ id: "b" }));
+    store().removeItem("a");
+    expect(ids()).toEqual(["b"]);
+    store().clearCart();
+    expect(store().items).toEqual([]);
+  });
+
+  it("hydrate mengisi keranjang dari data tersimpan", () => {
+    store().hydrate([{ ...product(), qty: 3 }]);
+    expect(store().items[0]?.qty).toBe(3);
+  });
+});
+
+describe("syncProducts", () => {
+  it("mengeluarkan barang yang sudah tidak ada di katalog dan mengembalikan jumlahnya", () => {
+    store().addItem(product({ id: "a" }));
+    store().addItem(product({ id: "b" }));
+    store().addItem(product({ id: "c" }));
+    expect(store().syncProducts([product({ id: "b" })])).toBe(2);
+    expect(ids()).toEqual(["b"]);
+  });
+
+  it("membatasi qty ke stok terbaru dan memperbarui harga", () => {
+    store().addItem(product(), 8);
+    expect(store().syncProducts([product({ stock: 3, price: 90000 })])).toBe(0);
+    expect(store().items[0]).toEqual({ ...product({ stock: 3, price: 90000 }), qty: 3 });
+  });
+
+  it("tanpa perubahan: referensi items TETAP dan subscriber tidak dinotifikasi (tanpa render ulang)", () => {
+    store().addItem(product());
+    const before = store().items;
+    let notified = 0;
+    const off = useCartStore.subscribe(() => void (notified += 1));
+    expect(store().syncProducts([product()])).toBe(0);
+    off();
+    expect(store().items).toBe(before);
+    expect(notified).toBe(0);
   });
 });
 
 describe("selector", () => {
   it("selectTotalQty & selectTotalPrice menjumlahkan semua item", () => {
-    const s = useCartStore.getState();
-    s.addItem(product({ id: "a", price: 10000 }), 2);
-    s.addItem(product({ id: "b", price: 5000 }), 3);
-    expect(selectTotalQty(useCartStore.getState())).toBe(5);
-    expect(selectTotalPrice(useCartStore.getState())).toBe(35000);
+    store().addItem(product({ id: "a", price: 10000 }), 2);
+    store().addItem(product({ id: "b", price: 5000 }), 3);
+    expect(selectTotalQty(store())).toBe(5);
+    expect(selectTotalPrice(store())).toBe(35000);
   });
 
   it("selectQtyOf mengembalikan qty satu produk, 0 bila belum ada", () => {
-    useCartStore.getState().addItem(product({ id: "a" }), 4);
-    expect(selectQtyOf("a")(useCartStore.getState())).toBe(4);
-    expect(selectQtyOf("zzz")(useCartStore.getState())).toBe(0);
+    store().addItem(product({ id: "a" }), 4);
+    expect(selectQtyOf("a")(store())).toBe(4);
+    expect(selectQtyOf("zzz")(store())).toBe(0);
   });
 });
