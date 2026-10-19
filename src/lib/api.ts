@@ -1,4 +1,5 @@
 import type { Booking, BookingInsert, Product, Service } from "../types";
+import { isUserFacingDbError } from "./dbErrors";
 import { requireSupabase, SupabaseConfigError } from "./supabase";
 
 /**
@@ -84,6 +85,8 @@ export async function createBooking(input: BookingInsert): Promise<void> {
     const { error } = await requireSupabase().from("bookings").insert(payload);
     if (error) throw error;
   } catch (err) {
+    // Pesan dari trigger database (mis. batas booking per nomor) sudah ramah pengguna: tampilkan apa adanya.
+    if (isUserFacingDbError(err)) throw new Error(err.message);
     throw toApiError("Gagal menyimpan booking", err);
   }
 }
