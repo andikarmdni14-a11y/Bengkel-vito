@@ -65,10 +65,16 @@ tanpa manfaat di skala ini. Bila nanti ada banyak slice yang saling bergantung, 
 
 ## Fase 4: code splitting yang aman untuk SEO
 
-Browser memuat halaman lewat `React.lazy`; prerender memakai import biasa. `main.tsx` mengunduh chunk halaman yang sedang
-dibuka **sebelum** `hydrateRoot`. `<Suspense fallback={<PageSkeleton />}>` ada di `PublicLayout` sehingga Navbar/Footer tetap tampil.
-`ScrollToTarget` berada di dalam Suspense agar tautan `/kontak#booking` tetap menggulir setelah halaman lazy selesai dimuat.
-Menambah halaman: daftarkan di `AppPages` (`App.tsx`), `lazy.ts`, `eager.ts`, `ROUTES` di `scripts/prerender.mjs`.
+`App.tsx` memakai `React.lazy(() => import("@/pages/..."))` langsung (satu dynamic import = satu chunk Vite; proyek tidak punya
+barrel file yang bisa menghalanginya). `<Suspense fallback={<PageSkeleton />}>` ada di `PublicLayout`, sehingga Navbar/Footer
+tetap tampil. `ScrollToTarget` berada di dalam Suspense agar tautan `/kontak#booking` tetap menggulir setelah halaman lazy dimuat.
+
+**Prerender:** `renderToString` tidak menunggu komponen lazy (hanya menulis fallback), jadi `entry-server.tsx` memakai
+`renderToPipeableStream` + `onAllReady`. `render(url)` kini async (`await` di `scripts/prerender.mjs`), memiliki batas waktu
+15 dtk, dan galat di dalam batas Suspense menggagalkan build (tidak diam-diam menjadi render ulang di klien).
+Di browser, markup prerender memuat batas Suspense yang sudah terisi; bila chunk belum terunduh saat hydration, React menahan
+HTML server dan menghidupkannya setelah chunk tiba. Menambah halaman: tambahkan `lazy()` + `<Route>` di `App.tsx` dan path-nya
+ke `ROUTES` di `scripts/prerender.mjs`.
 
 ## Fase 6: keamanan Supabase
 

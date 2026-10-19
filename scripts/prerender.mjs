@@ -43,11 +43,16 @@ function buildPage({ html, head }, routePath) {
   );
 }
 
-const outFile = (routePath) =>
-  routePath === "/" ? path.join(distDir, "index.html") : path.join(distDir, routePath.replace(/^\//, ""), "index.html");
+const outFile = (routePath) => {
+  const file =
+    routePath === "/" ? path.join(distDir, "index.html") : path.join(distDir, routePath.replace(/^\//, ""), "index.html");
+  // Jangan pernah menulis di luar dist/ (mis. bila ROUTES kelak diisi dari sumber yang tidak tepercaya).
+  if (!path.resolve(file).startsWith(distDir + path.sep)) fail(`Route ${routePath} mengarah ke luar dist/.`);
+  return file;
+};
 
 for (const route of ROUTES) {
-  const result = render(route);
+  const result = await render(route); // async: menunggu chunk halaman lazy (lihat src/entry-server.tsx)
   if (!result.title) fail(`Route ${route}: <title> dari Helmet kosong (pastikan halaman memakai <Seo />).`);
   if (!result.html.includes("<h1")) fail(`Route ${route}: markup tidak memuat <h1>, render kemungkinan gagal.`);
 
@@ -59,6 +64,6 @@ for (const route of ROUTES) {
 
 // 404.html: halaman NotFound (noindex). Dipakai otomatis oleh Netlify, Cloudflare Pages, GitHub Pages, dll.
 // untuk alamat tak dikenal, dengan status 404 yang benar. Tanpa data-prerender-path, klien selalu render ulang.
-const notFound = render("/halaman-tidak-ada");
+const notFound = await render("/halaman-tidak-ada");
 await writeFile(path.join(distDir, "404.html"), buildPage(notFound, null), "utf8");
 console.log(`[prerender] 404        -> dist/404.html  |  ${notFound.title}`);

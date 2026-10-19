@@ -5,7 +5,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { createQueryClient } from "./lib/queryClient";
-import { lazyPages, preloadRoute } from "./pages/lazy";
 import { normalizePath } from "./utils/path";
 import "./index.css";
 
@@ -25,7 +24,7 @@ const app = (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <App pages={lazyPages} />
+          <App />
         </BrowserRouter>
         {ReactQueryDevtools && (
           <Suspense fallback={null}>
@@ -44,13 +43,9 @@ const app = (
 const prerenderedPath = rootElement.dataset.prerenderPath;
 
 if (rootElement.hasChildNodes() && prerenderedPath === normalizePath(window.location.pathname)) {
-  // Halaman ini lazy: unduh dulu chunk-nya, BARU hydrate. Tanpa ini, React mendapati komponen yang belum
-  // dimuat di tengah hydration dan harus menundanya. Bila unduhan gagal, tetap hydrate (lazy akan mencoba lagi).
-  preloadRoute(window.location.pathname)
-    .catch(() => undefined)
-    .finally(() => {
-      ReactDOM.hydrateRoot(rootElement, app);
-    });
+  // Halaman bersifat lazy. Markup prerender memuat batas <Suspense> yang sudah terisi, jadi bila chunk halaman belum
+  // terunduh saat hydration, React mempertahankan HTML server dan menghidupkannya begitu chunk tiba (tanpa mismatch).
+  ReactDOM.hydrateRoot(rootElement, app);
 } else {
   ReactDOM.createRoot(rootElement).render(app);
 }

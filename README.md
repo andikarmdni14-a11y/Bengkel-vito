@@ -62,9 +62,9 @@ Di browser, `src/main.tsx` melakukan hydrate bila markup di `#root` memang untuk
 - **Menambah route prerender:** tambahkan path-nya ke `ROUTES` di `scripts/prerender.mjs`.
 - **Aturan hydration:** render pertama di klien harus sama dengan HTML server. Jangan membaca `localStorage`,
   `window`, atau tanggal/waktu langsung saat render; baca di `useEffect` (contoh: `useCartPersistence`, `BookingForm`).
-- **Halaman lazy vs prerender:** `App` menerima halaman lewat prop `pages`. Browser memakai `pages/lazy.ts` (`React.lazy`, satu
-  chunk per halaman), prerender memakai `pages/eager.ts` (import biasa), karena `renderToString` tidak menunggu komponen lazy.
-  Jangan mengganti ini dengan `lazy()` langsung di `App.tsx`: HTML prerender akan kehilangan isi halaman.
+- **Halaman lazy vs prerender:** `App.tsx` memuat halaman lewat `React.lazy`, dan `entry-server.tsx` memakai
+  `renderToPipeableStream` + `onAllReady` supaya prerender menunggu chunk halaman. Jangan kembali ke `renderToString`:
+  ia hanya menulis fallback Suspense, sehingga HTML prerender kehilangan isi halaman.
 - **Data Supabase** (layanan/produk) tetap dimuat di klien, jadi HTML prerender berisi kerangka (skeleton)
   untuk bagian itu; judul, meta, `<h1>`, dan teks statis sudah ada di HTML.
 - **Hosting:** tidak perlu lagi rewrite `/* -> /index.html` untuk keempat route. Hosting yang mendukung `404.html`
@@ -86,7 +86,7 @@ Setiap halaman mengatur `<title>` dan meta description sendiri lewat komponen `S
 
 ```
 src/
-├── main.tsx · App.tsx           # main.tsx: providers (Helmet, QueryClient, Router) + hydrate/render; App.tsx: route (halaman disuntikkan)
+├── main.tsx · App.tsx           # main.tsx: providers (Helmet, QueryClient, Router) + hydrate/render; App.tsx: route + React.lazy
 ├── entry-server.tsx             # render(url) untuk prerender (dipakai scripts/prerender.mjs)
 ├── types/index.ts               # Product, Service, Booking, CartItem, ...
 ├── lib/
@@ -94,7 +94,7 @@ src/
 │   ├── api.ts · dbErrors.ts              # semua query/insert Supabase (try/catch + pesan galat ramah)
 │   └── queryClient.ts                    # pabrik QueryClient: staleTime, retry+backoff, toast galat
 ├── queries/                     # TanStack Query terpusat: keys.ts, products.ts, services.ts, bookings.ts, useQueryStatus.ts
-├── pages/                       # Beranda, Layanan, Katalog, Kontak, NotFound + lazy.ts (browser) / eager.ts (prerender)
+├── pages/                       # Beranda, Layanan, Katalog, Kontak, NotFound (masing-masing satu chunk)
 ├── components/
 │   ├── ui/                      # komponen presentasi reusable tanpa logika bisnis: Photo, Skeletons, Seo, CustomSelect, ...
 │   └── layout/                  # PublicLayout, Navbar, MobileMenu, Footer, WhatsAppFloat
