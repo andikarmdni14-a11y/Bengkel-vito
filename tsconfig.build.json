@@ -1,0 +1,16 @@
+{
+  // Dipakai HANYA oleh `npm run build`: tes, e2e, dan docs tidak ikut kompilasi produksi.
+  // `npm run typecheck` (tsconfig.json) tetap memeriksa tes juga; jalankan keduanya di CI.
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-ssr",
+    "docs",
+    "e2e",
+    "playwright.config.ts",
+    "src/test",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ]
+}

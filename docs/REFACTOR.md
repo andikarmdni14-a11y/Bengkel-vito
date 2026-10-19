@@ -17,6 +17,13 @@ npx playwright install chromium  # sekali, untuk npm run test:e2e
 > murni (reducer, storage, store, utilitas, validasi env, state query) lewat harness terpisah. Jalankan perintah di atas
 > sebelum merge, dan kirim galatnya bila ada.
 
+## Build produksi vs tes
+
+`npm run build` memakai `tsconfig.build.json` yang mengecualikan `*.test.ts(x)`, `src/test`, `e2e`, `docs`, dan
+`playwright.config.ts` (59 file dikompilasi, vs 76 di `tsconfig.json`). `npm run typecheck` tetap memeriksa tes: jalankan
+keduanya di CI. Bundel Vite memang tidak pernah memuat tes/docs (tidak diimpor dan di luar `public/`); Tailwind juga tidak
+memindai berkas tes. Audit prerender: lihat `docs/PRERENDER_AUDIT.md`.
+
 ## Temuan penting sebelum mengubah apa pun
 
 | Asumsi di brief | Kenyataan di kode | Konsekuensi |
@@ -32,7 +39,7 @@ npx playwright install chromium  # sekali, untuk npm run test:e2e
 | 1 | testing | Vitest + RTL + jsdom, Playwright, alias `@/`, tes `src/utils/*` | `npm test` |
 | 2 | TanStack Query | `lib/queryClient.ts`, `queries/*`, hapus `useAsyncResource` | halaman Beranda/Katalog/Layanan memuat data; matikan jaringan -> pesan galat + "Coba lagi" |
 | 3 | Zustand | `features/cart/*`, hapus `CartContext` | tambah ke keranjang, refresh halaman (keranjang tetap), buka keranjang (harga/stok sinkron) |
-| 4 | Code splitting | `App` menerima `pages`; `pages/lazy.ts` + `pages/eager.ts`; Suspense di layout | `npm run build` lalu `npm run preview`: tab Network menampilkan satu chunk per halaman; "Lihat sumber" `/katalog` berisi `<h1>` |
+| 4 | Code splitting | `React.lazy` langsung di `App.tsx`; prerender via `renderToPipeableStream`; Suspense di layout | `npm run build` lalu `npm run preview`: tab Network menampilkan satu chunk per halaman; "Lihat sumber" `/katalog` berisi `<h1>` |
 | 5 | Struktur folder | `components/ui`, `components/layout`, `features/*` (dipindah otomatis, impor ditulis ulang) | `npm run typecheck` |
 | 6 | Supabase | `supabaseConfig.ts`, SQL `rls_hardening`/`verify_rls`/`optional_rate_limit` | jalankan `verify_rls.sql` (lihat bawah) |
 | 7 | Photo | `failedSrc`, `srcSet`/`sizes`/`sources`, `width`/`height` | `npm test` |
